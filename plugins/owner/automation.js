@@ -1,14 +1,13 @@
-// 🤖 Plugin: AUTOMATION (Owner)
-// Gère les automatisations globales (Status, Présence)
+// 🤖 Plugin: RICHI-MD GHOST OPERATIONS
+// Description: Gestion des protocoles d'automatisation et de présence
 
 const { updateSetting, getSettings } = require('../../lib/database');
-const { t } = require('../../lib/language');
 
 const AUTOMATIONS = [
-    { cmd: 'autostatusview', name: 'AUTO-STATUS-VIEW', desc: 'Vue auto des statuts' },
-    { cmd: 'autostatusreact', name: 'AUTO-STATUS-REACT', desc: 'Réaction auto des statuts' },
-    { cmd: 'autotyping', name: 'AUTO-TYPING', desc: 'Simule l\'écriture' },
-    { cmd: 'autorecord', name: 'AUTO-RECORD', desc: 'Simule l\'enregistrement vocal' }
+    { cmd: 'autostatusview', name: 'AUTO-STATUS-VIEW', desc: 'Capture et vue automatique des statuts' },
+    { cmd: 'autostatusreact', name: 'AUTO-STATUS-REACT', desc: 'Réaction bio-rythmique aux statuts' },
+    { cmd: 'autotyping', name: 'AUTO-TYPING', desc: 'Simule l\'injection de données (Typing)' },
+    { cmd: 'autorecord', name: 'AUTO-RECORD', desc: 'Simule l\'encodage audio (Recording)' }
 ];
 
 const commands = AUTOMATIONS.map(auto => ({
@@ -16,37 +15,42 @@ const commands = AUTOMATIONS.map(auto => ({
     aliases: [],
     category: 'owner',
     description: auto.desc,
-    usage: `.${auto.cmd} <on/off>`,
+    usage: `${auto.cmd} <on/off>`,
     
     ownerOnly: true,
 
-    execute: async (client, message, args) => {
+    execute: async (sock, message, args, msgOptions) => {
+        const { remoteJid } = msgOptions;
         const setting = args[0]?.toLowerCase();
         const currentConfig = getSettings();
 
-        // Gestion conflit Typing/Record (un seul actif à la fois)
+        // 1. Logique de conflit (Évite les signatures de présence doubles)
         if (setting === 'on') {
             if (auto.cmd === 'autotyping') updateSetting('autorecord', false);
             if (auto.cmd === 'autorecord') updateSetting('autotyping', false);
         }
 
+        // 2. État du module
         if (!setting) {
-            return client.sendMessage(message.key.remoteJid, { 
-                text: t('owner.auto_status', { cmd: auto.name, status: currentConfig[auto.cmd] ? 'on' : 'off' })
+            const status = currentConfig[auto.cmd] ? 'RUNNING ⚙️' : 'HALTED 🛑';
+            return sock.sendMessage(remoteJid, { 
+                text: `*─── 『 RICHI-MD AUTOMATION 』 ───*\n\n*🛠️ Protocol:* ${auto.name}\n*📊 Status:* ${status}\n*📝 Task:* ${auto.desc}\n\n*Usage:* .${auto.cmd} on | off` 
             }, { quoted: message });
         }
 
-        if (setting === 'on') {
-            updateSetting(auto.cmd, true);
-            return client.sendMessage(message.key.remoteJid, { text: t('owner.auto_on', { cmd: auto.name }) }, { quoted: message });
+        // 3. Exécution des switchs
+        if (setting === 'on' || setting === 'off') {
+            const isEnabled = setting === 'on';
+            updateSetting(auto.cmd, isEnabled);
+            
+            await sock.sendMessage(remoteJid, { react: { text: isEnabled ? "🛰️" : "💤", key: message.key } });
+            
+            return sock.sendMessage(remoteJid, { 
+                text: `*── [ ⚡ KERNEL UPDATE ] ──*\n\nLe protocole *${auto.name}* a été mis à jour.\n*Nouveau statut:* ${setting.toUpperCase()}` 
+            });
         }
 
-        if (setting === 'off') {
-            updateSetting(auto.cmd, false);
-            return client.sendMessage(message.key.remoteJid, { text: t('owner.auto_off', { cmd: auto.name }) }, { quoted: message });
-        }
-
-        client.sendMessage(message.key.remoteJid, { text: t('owner.usage', { usage: `.${auto.cmd} <on/off>` }) }, { quoted: message });
+        sock.sendMessage(remoteJid, { text: `*⚠️ Paramètre incorrect.* Use: .${auto.cmd} on/off` });
     }
 }));
 

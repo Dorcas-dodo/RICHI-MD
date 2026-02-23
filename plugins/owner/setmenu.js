@@ -1,26 +1,50 @@
-// 🖼️ Plugin: SETMENUIMAGE
+// 🖼️ Plugin: RICHI-MD VISUAL OVERRIDE
+// Description: Mise à jour des banques d'images du noyau (Menu)
+
 const { updateSetting } = require('../../lib/database');
-const { t } = require('../../lib/language');
 
 module.exports = {
     name: 'setmenuimage',
-    aliases: ['setmenu'],
+    aliases: ['setmenu', 'menuimg'],
     category: 'owner',
-    description: 'Change les images du menu',
-    usage: '.setmenu <url1> <url2> ...',
+    description: 'Injecte de nouvelles URLs pour les visuels du menu',
+    usage: 'setmenu <url1> <url2> ...',
     
     ownerOnly: true,
 
-    execute: async (client, message, args) => {
-        if (args.length === 0) return client.sendMessage(message.key.remoteJid, { text: t('owner.error_arg') }, { quoted: message });
+    execute: async (sock, message, args, msgOptions) => {
+        const { remoteJid } = msgOptions;
 
+        // 1. Vérification de la présence d'arguments
+        if (args.length === 0) {
+            return sock.sendMessage(remoteJid, { 
+                text: `*── [ ⚠️ DATA_ERROR ] ──*\n\nAucun flux détecté. Veuillez fournir une ou plusieurs URLs d'images.` 
+            }, { quoted: message });
+        }
+
+        // 2. Filtrage des liens (Validation du protocole HTTP/HTTPS)
         const urls = args.filter(arg => arg.startsWith('http'));
         
-        if (urls.length === 0) return client.sendMessage(message.key.remoteJid, { text: t('tools.ssweb_error') }, { quoted: message });
+        if (urls.length === 0) {
+            return sock.sendMessage(remoteJid, { 
+                text: `*── [ ⚠️ PROTOCOL_ERROR ] ──*\n\nLes liens fournis sont invalides ou corrompus.` 
+            }, { quoted: message });
+        }
 
+        // 3. Réaction de mise à jour système
+        await sock.sendMessage(remoteJid, { react: { text: "🖼️", key: message.key } });
+
+        // 4. Injection dans la Base de Données
         updateSetting('menuImages', urls);
-        await client.sendMessage(message.key.remoteJid, { 
-            text: t('owner.menu_img_changed', { count: urls.length })
-        }, { quoted: message });
+
+        // 5. Rapport de déploiement visuel
+        const report = `*─── 『 RICHI-MD CORE 』 ───*\n\n`
+            + `*🛠️ MODULE :* VISUAL_RECONFIG\n`
+            + `*📂 IMAGES CHARGÉES :* ${urls.length}\n`
+            + `*📊 STATUS :* UPLOAD_SUCCESS\n\n`
+            + `*Note :* La banque d'images du menu a été synchronisée. Les nouveaux visuels seront alternés de manière aléatoire.\n\n`
+            + `*© GRAPHIC_KERNEL_UPDATED*`;
+
+        await sock.sendMessage(remoteJid, { text: report }, { quoted: message });
     }
 };

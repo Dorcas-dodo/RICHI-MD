@@ -1,12 +1,11 @@
-// ⚙️ REN-MDX - CONFIGURATION (Via .env)
 require('dotenv').config();
 
 module.exports = {
   // --- IDENTITÉ ---
-  botName: process.env.BOT_NAME || 'REN-MDX',
-  ownerName: process.env.OWNER_NAME || 'Admin',
-  ownerNumber: (process.env.OWNER_NUMBER || '237650471093').split(','), // Support multi-owner via virgule
-  phoneNumber: process.env.OWNER_NUMBER || '237650471093', // Pour pairing code
+  botName: process.env.BOT_NAME || 'Richi-MD',
+  ownerName: process.env.OWNER_NAME || 'Celeste',
+  ownerNumber: (process.env.OWNER_NUMBER || '242061167557').split(','), 
+  phoneNumber: process.env.OWNER_NUMBER || '242061167557', 
   prefix: process.env.PREFIX || '.',
 
   // --- PARAMÈTRES INTERNES ---

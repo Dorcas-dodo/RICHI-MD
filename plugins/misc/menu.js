@@ -1,65 +1,50 @@
-// 📜 Plugin: MENU (Stylisé)
+// 📜 Plugin: RICHI-MD KERNEL TERMINAL (ULTIMATE DARK-NET EDITION)
 const fs = require('fs');
 const path = require('path');
 const config = require('../../config');
 const { getSettings } = require('../../lib/database');
 const { styleText, formatUptime } = require('../../lib/functions');
-const { t } = require('../../lib/language');
-
-const MENU_IMAGES = [
-    "https://i.postimg.cc/mDhT0csk/5d815d55908eafd04d29d88e5146a0f9.jpg",
-    "https://i.postimg.cc/fR2z57GC/5ee7de12fe61c6d1b6ee80dbcb489c1c.jpg",
-    "https://i.postimg.cc/FsGNsgHF/40ddc28ad52c8b2fb1e9e290dbefacf9.jpg"
-];
 
 module.exports = {
     name: 'menu',
-    aliases: ['help', 'list'],
+    aliases: ['help', 'richi', 'terminal'],
     category: 'misc',
-    description: 'Affiche le menu stylisé',
-    usage: '.menu',
+    description: 'Interface d\'accès au noyau Richi-MD',
 
-    // FLAGS
-    groupOnly: false,
-    ownerOnly: false,
-    adminOnly: false,
-    newsletterShow: true, // Activation Newsletter (Enveloppe)
-    // contextInfo: false, // Désactivé (Pas d'AdReply/Miniature riche)
-
-    execute: async (client, message, args, msgOptions) => {
-        // 0. Réaction
-        await client.sendMessage(message.key.remoteJid, { react: { text: "👾", key: message.key } });
-
+    execute: async (sock, message, args, msgOptions) => {
+        const { remoteJid } = msgOptions;
+        
+        // 1. Récupération des réglages
         const settings = getSettings();
         const prefix = settings.prefix || config.prefix;
-        const botName = settings.botName || config.botName; // Botname NON stylisé
-        const lang = settings.lang || config.defaultLang;
-        const username = message.pushName || "Utilisateur";
+        const botName = (settings.botName || "RICHI-MD").toUpperCase();
+        const username = message.pushName || "USER_UNKNOWN";
 
-        // 1. Choix image (depuis DB)
-        const images = settings.menuImages && settings.menuImages.length > 0 
-            ? settings.menuImages 
-            : MENU_IMAGES; // Fallback
-        const randomImage = images[Math.floor(Math.random() * images.length)];
+        // 2. Gestion de l'image locale ren.jpg
+        const localImgPath = path.join(__dirname, '../../ren.jpg');
+        const menuImage = fs.existsSync(localImgPath) ? fs.readFileSync(localImgPath) : { url: "https://i.postimg.cc/mDhT0csk/5d815d55908eafd04d29d88e5146a0f9.jpg" };
 
+        await sock.sendMessage(remoteJid, { react: { text: "🔌", key: message.key } });
+
+        // 3. Header ASCII & Logs (Nettoyé des bugs d'encodage)
+        let caption = `        RICHI-MD KERNEL V3\n`;
+        caption += `====================================\n\n`;
+        
+        caption += `[☠️] DECRYPTING_SYSTEM... [OK]\n`;
+        caption += `[🔓] BYPASSING_FIREWALL... [OK]\n\n`;
+
+        caption += `╔══════════『 **DATABASE** 』═════════╗\n`;
+        caption += `  ⚡ **ID** : ${botName}_NET_V4\n`;
+        caption += `  👤 **OPERATOR** : ${username}\n`;
+        caption += `  ⏳ **UPTIME** : ${formatUptime(process.uptime())}\n`;
+        caption += `  🗝️ **ACCESS** : [ ${prefix} ]\n`;
+        caption += `  🌐 **NETWORK** : RICHI_PRIVATE_VPN\n`;
+        caption += `╚════════════════════════════════╝\n\n`;
+
+        // 4. Boucle des Talents (Scan récursif)
         const pluginsDir = path.join(__dirname, '../../plugins');
         const categories = fs.readdirSync(pluginsDir);
-        
-const { t } = require('../../lib/language');
-
-// ... (code intermédiaire identique)
-
-        const greeting = lang === 'fr' ? t('menu.greet_fr') : t('menu.greet_en');
-
-        // Construction du menu avec styleText() appliqué aux corps
-        let caption = `‎❏ ${botName} ❏\n`
-            + `‎╭━━━━━━━━━━━━━━━✦\n`
-            + `‎┃${styleText(greeting)} ${username}\n`
-            + `‎╰━━━━━━━━━━━━━━━✦\n‎\n`
-            + `‎━━━━━━━━━━━━━━✦\n`
-            + `‎❍ ${styleText(t('menu.uptime'))} : ${formatUptime(process.uptime())}\n`
-            + `‎❍ ${styleText(t('menu.prefix'))} : ${prefix}\n`
-            + `‎━━━━━━━━━━━━━━✦\n‎`;
+        let totalCmds = 0;
 
         categories.forEach(category => {
             const catPath = path.join(pluginsDir, category);
@@ -67,27 +52,46 @@ const { t } = require('../../lib/language');
                 const files = fs.readdirSync(catPath).filter(file => file.endsWith('.js'));
                 
                 if (files.length > 0) {
-                    caption += `\n‎╭━❍ ${styleText(category)}\n`;
+                    caption += `📂 **DIR://**${category.toUpperCase()}\n`;
+                    
                     files.forEach(file => {
-                        const pluginModule = require(path.join(catPath, file));
-                        // Supporte export unique OU tableau
-                        const commands = Array.isArray(pluginModule) ? pluginModule : [pluginModule];
+                        try {
+                            const pluginModule = require(path.join(catPath, file));
+                            const commands = Array.isArray(pluginModule) ? pluginModule : [pluginModule];
 
-                        commands.forEach(plugin => {
-                            if (plugin.name) {
-                                caption += `‎➠ ${styleText(plugin.name)}\n`;
-                            }
-                        });
+                            commands.forEach(plugin => {
+                                if (plugin.name) {
+                                    caption += `  ﹂ \`${prefix}${plugin.name}\`\n`;
+                                    totalCmds++;
+                                }
+                            });
+                        } catch (e) {}
                     });
-                    caption += `‎╰━━━━━━━━━━━━━━━╯\n`;
+                    caption += `\n`;
                 }
             }
         });
 
-        await client.sendMessage(message.key.remoteJid, {
-            image: { url: randomImage },
-            caption: caption,
-            ...msgOptions // Injecte contextInfo (newsletter uniquement)
-        }, { quoted: null }); // Pas de citation
+        caption += `====================================\n`;
+        caption += `[!] STATUS: OPERATIONAL\n`;
+        caption += `[!] TOTAL_MODULES: ${totalCmds}\n`;
+        caption += `[!] CREATED_BY: RICHI_DEV`;
+
+        // 5. Envoi Final avec AdReply Ghost
+        await sock.sendMessage(remoteJid, {
+            image: menuImage,
+            caption: styleText(caption),
+            contextInfo: {
+                externalAdReply: {
+                    title: `⚠️ SYSTEM_INTRUSION_DETECTED`,
+                    body: `RICHI-MD : PRIVATE_CYBER_CONSOLE`,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    thumbnail: menuImage,
+                    sourceUrl: "https://github.com/Richi", 
+                    showAdAttribution: true
+                }
+            }
+        }, { quoted: message });
     }
 };

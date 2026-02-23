@@ -1,70 +1,73 @@
-// 🛠️ Plugin: STICKER (Version FFMPEG native)
-// Convertit images/vidéos en stickers sans dépendances lourdes
+// 🛠️ Plugin: RICHI-MD STICKER ENGINE
+// Description: Encodage de flux média en protocole WebP (Sticker)
 
 const { downloadContentFromMessage } = require('gifted-baileys');
-const { t } = require('../../lib/language');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const { getRandom } = require('../../lib/functions'); // Il faudra créer cette fonction
 
 module.exports = {
     name: 'sticker',
-    aliases: ['s', 'stick'],
+    aliases: ['s', 'stick', 'k'],
     category: 'tools',
-    description: 'Convertit une image/vidéo en sticker',
-    usage: '.sticker (en réponse)',
+    description: 'Convertit une image ou une vidéo en sticker cybernétique',
+    usage: 'sticker (en réponse à un média)',
 
-    execute: async (client, message, args) => {
+    execute: async (sock, message, args, msgOptions) => {
+        const { remoteJid } = msgOptions;
+
         try {
+            // 1. Identification du flux
             const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage || message.message;
             const mime = (quoted.imageMessage || quoted.videoMessage || quoted.stickerMessage)?.mimetype || '';
             
-            if (!mime) return client.sendMessage(message.key.remoteJid, { text: t('tools.no_media') });
+            if (!mime) {
+                return sock.sendMessage(remoteJid, { 
+                    text: `*── [ ⚠️ NO_DATA ] ──*\n\nAucun flux média détecté. Veuillez cibler une image ou une vidéo.` 
+                });
+            }
 
-            await client.sendMessage(message.key.remoteJid, { react: { text: '⏳', key: message.key } });
+            await sock.sendMessage(remoteJid, { react: { text: '🌀', key: message.key } });
 
-            // Téléchargement
+            // 2. Téléchargement du binaire
             const type = Object.keys(quoted)[0].replace('Message', '');
             const stream = await downloadContentFromMessage(quoted[Object.keys(quoted)[0]], type);
             let buffer = Buffer.from([]);
-            for await (const chunk of stream) {
-                buffer = Buffer.concat([buffer, chunk]);
-            }
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-            // Conversion FFMPEG "Manuelle" (Plus robuste sur les panels)
-            const randomName = Math.floor(Math.random() * 10000);
-            const inputPath = path.join(__dirname, `../../temp/${randomName}.${mime.split('/')[1]}`);
-            const outputPath = path.join(__dirname, `../../temp/${randomName}.webp`);
+            // 3. Préparation des vecteurs de sortie
+            const tempDir = path.join(__dirname, '../../temp');
+            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
-            if (!fs.existsSync(path.join(__dirname, '../../temp'))) fs.mkdirSync(path.join(__dirname, '../../temp'));
+            const fileName = `Richi_${Date.now()}`;
+            const inputPath = path.join(tempDir, `${fileName}.${mime.split('/')[1].split(';')[0]}`);
+            const outputPath = path.join(tempDir, `${fileName}.webp`);
+
             fs.writeFileSync(inputPath, buffer);
 
-            // Commande FFMPEG magique pour WhatsApp Sticker
-            // -vcodec libwebp : Codec WebP
-            // -vf : Redimensionne en 512x512 en gardant le ratio et ajoute du padding transparent
-            // -loop 0 : Animation infinie (pour les GIFs)
-            // -ss 00:00:00 -t 00:00:05 : Max 5 secondes pour éviter les stickers trop lourds
-            const ffmpegCmd = `ffmpeg -i "${inputPath}" -vcodec libwebp -filter:v "scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse" -loop 0 -ss 00:00:00 -t 00:00:05 -preset default -an -vsync 0 "${outputPath}"`;
+            // 4. Commande FFMPEG (Optimisée pour WhatsApp)
+            // -vf : Redimensionne en 512x512, 15fps max pour le poids, padding transparent
+            const ffmpegCmd = `ffmpeg -i "${inputPath}" -vcodec libwebp -vf "scale='min(512,iw)':min'(512,ih)':force_original_aspect_ratio=decrease,fps=15,pad=512:512:-1:-1:color=white@0.0" -loop 0 -ss 00:00:00 -t 00:00:07 -preset default -an -vsync 0 "${outputPath}"`;
 
             exec(ffmpegCmd, async (error) => {
                 if (error) {
                     console.error("FFMPEG Error:", error);
-                    fs.unlinkSync(inputPath); // Nettoyage
-                    return client.sendMessage(message.key.remoteJid, { text: t('tools.sticker_error') });
+                    if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+                    return sock.sendMessage(remoteJid, { text: `*❌ ERREUR :* Échec de l'encodage du flux.` });
                 }
 
+                // 5. Injection du sticker dans le chat
                 const stickerBuffer = fs.readFileSync(outputPath);
-                await client.sendMessage(message.key.remoteJid, { sticker: stickerBuffer });
+                await sock.sendMessage(remoteJid, { sticker: stickerBuffer }, { quoted: message });
                 
-                // Nettoyage
-                fs.unlinkSync(inputPath);
-                fs.unlinkSync(outputPath);
+                // 6. Nettoyage des traces (Cyber-clean)
+                if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+                if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
             });
 
         } catch (error) {
-            console.error(error);
-            client.sendMessage(message.key.remoteJid, { text: t('tools.sticker_error') });
+            console.error('Sticker Error:', error);
+            sock.sendMessage(remoteJid, { text: `*❌ ERREUR CRITIQUE :* Noyau d'encodage instable.` });
         }
     }
 };

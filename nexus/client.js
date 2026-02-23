@@ -1,6 +1,4 @@
-// 🌐 NEXUS - CLIENT DE CONNEXION OPTIMISÉ
-// Code inspiré par SEN (connexion directe + pairing)
-
+// 🌐 RICHI-MD - CLIENT DE CONNEXION OPTIMISÉ (V2)
 const {
     default: makeWASocket,
     useMultiFileAuthState,
@@ -10,27 +8,34 @@ const {
 } = require('gifted-baileys');
 const pino = require('pino');
 const chalk = require('chalk');
-const fs = require('fs');
+const fs = require('fs-extra'); // Utilisation de fs-extra pour plus de robustesse
 const path = require('path');
 const config = require('../config');
 
-// Gestionnaire d'événements (Handler)
+// Gestionnaires
 const { messageHandler } = require('./handler');
 const { monitorMessage, monitorGroupUpdate } = require('./monitor'); 
 const { getSettings } = require('../lib/database');
 const { styleText } = require('../lib/functions');
 
 async function connectToWhatsApp() {
+    // Initialisation de l'état d'authentification
     const { state, saveCreds } = await useMultiFileAuthState(config.sessionName);
     const { version } = await fetchLatestBaileysVersion();
     
-    console.log(chalk.cyan(`🚀 Lancement de ${config.botName}...`));
+    console.log(chalk.cyan(`
+    =====================================
+        🚀 LANCEMENT DE RICHI-MD...
+        Propriétaire : ${config.ownerName}
+    =====================================
+    `));
 
     const sock = makeWASocket({
         version,
         logger: pino({ level: 'silent' }),
-        printQRInTerminal: !config.pairingCode,
-        browser: ["Ubuntu", "Chrome", "20.0.04"],
+        printQRInTerminal: !config.phoneNumber, 
+        // ✅ CORRECTIF IPHONE : On utilise une identité reconnue (Ubuntu/Chrome)
+        browser: ["Ubuntu", "Chrome", "20.0.04"], 
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
@@ -44,24 +49,24 @@ async function connectToWhatsApp() {
         getMessage: async (key) => { return undefined }
     });
 
-    // 🔗 GESTION DU PAIRING CODE (Automatique si pas connecté)
+    // 🔗 GESTION DU PAIRING CODE
     if (!sock.authState.creds.registered) {
         setTimeout(async () => {
             let phoneNumber = config.phoneNumber?.replace(/[^0-9]/g, '');
             
             if (!phoneNumber) {
-                console.log(chalk.red("❌ Aucun numéro de pairing défini dans config.js ou .env !"));
+                console.log(chalk.red("❌ Aucun numéro défini pour le pairing code !"));
                 return;
             }
 
-            console.log(chalk.yellow(`⏳ Demande de pairing pour : ${phoneNumber}`));
+            console.log(chalk.yellow(`⏳ Richi-MD demande un code pour : ${phoneNumber}`));
 
             try {
                 let code = await sock.requestPairingCode(phoneNumber);
                 code = code?.match(/.{1,4}/g)?.join("-") || code;
-                console.log(chalk.green(`\n✅ CODE DE JUMELAGE : ${code}\n`));
+                console.log(chalk.white.bgGreen.bold(`\n ✅ TON CODE DE JUMELAGE : ${code} \n`));
             } catch (e) {
-                console.log(chalk.red("❌ Erreur pairing (Vérifiez le numéro) :", e.message));
+                console.log(chalk.red("❌ Erreur pairing :", e.message));
             }
         }, 4000);
     }
@@ -74,73 +79,53 @@ async function connectToWhatsApp() {
             const statusCode = lastDisconnect.error?.output?.statusCode;
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
             
-            console.log(chalk.yellow(`Connexion fermée (Code: ${statusCode}), Reconnexion: ${shouldReconnect}`));
+            console.log(chalk.yellow(`🔄 Connexion interrompue (Code: ${statusCode}). Reconnexion...`));
             
             if (statusCode === DisconnectReason.loggedOut) {
-                console.log(chalk.red("⛔ Session invalide. Veuillez supprimer le dossier 'session' et scanner à nouveau."));
-                // Optionnel : fs.rmSync(config.sessionName, { recursive: true, force: true });
+                console.log(chalk.red(`⛔ Session expirée dans '${config.sessionName}'. Nettoyage...`));
+                fs.removeSync(config.sessionName); // Supprime le dossier de session corrompu
                 process.exit(1);
             }
 
             if (shouldReconnect) {
-                // Attendre un peu avant de reconnecter pour éviter le spam
                 setTimeout(connectToWhatsApp, 3000);
             }
         } else if (connection === 'open') {
-            console.log(chalk.green('✅ Connecté à WhatsApp !'));
+            console.log(chalk.green('✅ RICHI-MD EST CONNECTÉ !'));
 
-            // 1. AUTO FOLLOW NEWSLETTER
+            // 1. AUTO FOLLOW
             try {
-                await sock.newsletterFollow("120363420601379038@newsletter"); 
-                await sock.newsletterFollow("120363419924327792@newsletter"); 
-                if (config.newsletterJid && !config.newsletterJid.includes('120363161513685998')) {
-                     await sock.newsletterFollow(config.newsletterJid);
-                }
+                if (config.newsletterJid) await sock.newsletterFollow(config.newsletterJid);
             } catch (e) {} 
 
-            // 2. MESSAGE DE CONNEXION (Self)
+            // 2. LOG DE BORD
             const settings = getSettings();
             const botName = settings.botName || config.botName;
             const prefix = settings.prefix || config.prefix;
             
-            // Compter les plugins (Correction: charge les fichiers pour compter les tableaux)
             let pluginCount = 0;
             const pluginDir = path.join(__dirname, '../plugins');
             if (fs.existsSync(pluginDir)) {
-                fs.readdirSync(pluginDir).forEach(cat => {
-                    const catPath = path.join(pluginDir, cat);
-                    if (fs.lstatSync(catPath).isDirectory()) {
-                        fs.readdirSync(catPath).filter(f => f.endsWith('.js')).forEach(file => {
-                            try {
-                                const plugin = require(path.join(catPath, file));
-                                if (Array.isArray(plugin)) {
-                                    pluginCount += plugin.length;
-                                } else if (plugin.name) {
-                                    pluginCount++;
-                                }
-                            } catch (e) {}
-                        });
+                const files = fs.readdirSync(pluginDir, { withFileTypes: true });
+                for (const file of files) {
+                    if (file.isDirectory()) {
+                        pluginCount += fs.readdirSync(path.join(pluginDir, file.name)).filter(f => f.endsWith('.js')).length;
+                    } else if (file.name.endsWith('.js')) {
+                        pluginCount++;
                     }
-                });
+                }
             }
 
-            const caption = `> *CONNECT SUCCESSFUL*\n\n` +
-                            `➠ *BOTNAME* : ${botName}\n` +
-                            `➠ *OWNER* : ${config.ownerName}\n` +
-                            `➠ *PREFIX* : ${prefix}\n` +
-                            `➠ *PLUGINS* : ${pluginCount}\n\n` +
-                            `> ${styleText(`type ${prefix}menu to start`)}`;
+            const caption = `🌟 *RICHI-MD DÉMARRÉ*\n\n` +
+                            `👤 *PROPRIO* : ${config.ownerName}\n` +
+                            `🤖 *BOT* : ${botName}\n` +
+                            `⌨️ *PREFIX* : ${prefix}\n` +
+                            `📦 *MODULES* : ${pluginCount}\n\n` +
+                            `> ${styleText(`Système prêt. Tapez ${prefix}menu`)}`;
 
-            const images = settings.menuImages && settings.menuImages.length > 0 
-                ? settings.menuImages 
-                : ["https://i.postimg.cc/mDhT0csk/5d815d55908eafd04d29d88e5146a0f9.jpg"];
-            const randomImage = images[Math.floor(Math.random() * images.length)];
-
-            // Envoi au bot lui-même
             const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-            
             await sock.sendMessage(botJid, { 
-                image: { url: randomImage },
+                image: { url: config.logoUrl },
                 caption: caption
             });
         }
@@ -148,58 +133,31 @@ async function connectToWhatsApp() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    // 📩 GESTION DES MESSAGES (Handler + Monitor)
+    // 📩 GESTION DES MESSAGES
     sock.ev.on('messages.upsert', async (m) => {
         const msg = m.messages[0];
-        if (!msg) return;
+        if (!msg || !msg.message) return;
 
-        // --- GESTION DES STATUTS ---
+        // --- GESTION AUTO DES STATUTS ---
         if (msg.key.remoteJid === 'status@broadcast' && !msg.key.fromMe) {
-            try {
-                const settings = getSettings();
-                const participant = msg.key.participant;
-
-                if (!participant) return;
-
-                if (settings.autostatusview) {
-                    await sock.readMessages([msg.key]);
-                    console.log(chalk.green(`[STATUS] Vu : ${participant}`));
-                }
-
-                if (settings.autostatusreact) {
-                    const delay = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
-                    setTimeout(async () => {
-                        try {
-                            await sock.sendMessage('status@broadcast', { 
-                                react: { text: '💚', key: msg.key } 
-                            }, { statusJidList: [participant] });
-                        } catch (reactErr) {}
-                    }, delay); 
-                }
-            } catch (statusErr) {
-                console.error(chalk.yellow(`[STATUS ERROR] ${statusErr.message} (Bot continue)`));
+            const settings = getSettings();
+            if (settings.autostatusview) {
+                await sock.readMessages([msg.key]);
+                console.log(chalk.gray(`[STORY] Vu chez : ${msg.key.participant.split('@')[0]}`));
             }
             return;
         }
 
-        if (m.type === 'notify') {
-           const settings = getSettings();
-           const chatId = msg.key.remoteJid;
+        const settings = getSettings();
+        const chatId = msg.key.remoteJid;
 
-           if (settings.autotyping) {
-               await sock.sendPresenceUpdate('composing', chatId);
-               setTimeout(() => sock.sendPresenceUpdate('paused', chatId), 5000);
-           } else if (settings.autorecord) {
-               await sock.sendPresenceUpdate('recording', chatId);
-               setTimeout(() => sock.sendPresenceUpdate('paused', chatId), 5000);
-           }
+        // Effets de présence
+        if (settings.autotyping && !msg.key.fromMe) await sock.sendPresenceUpdate('composing', chatId);
 
-           await monitorMessage(sock, m);
-           await messageHandler(sock, m);
-        }
+        await monitorMessage(sock, m);
+        await messageHandler(sock, m);
     });
 
-    // 👥 GESTION DES GROUPES (Promote/Demote/Welcome)
     sock.ev.on('group-participants.update', async (update) => {
         await monitorGroupUpdate(sock, update);
     });

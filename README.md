@@ -1,113 +1,55 @@
 <p align="center">
-  <img src="./ren.jpg" alt="REN-MDX" width="100%" style="border-radius: 10px;"/>
+  <img src="./ren.jpg" alt="RICHI-MD-CORE" width="100%" style="border-radius: 15px; border: 2px solid #00ff00; box-shadow: 0px 0px 20px #00ff00;"/>
 </p>
 
-<h1 align="center">REN-MDX 🚀</h1>
+<h1 align="center"><code> ⚠️ RICHI-MD : KERNEL_OVERRIDE ⚠️ </code></h1>
 
 <p align="center">
-  <b>The Fast, Modular & Developer-Friendly WhatsApp Bot.</b><br>
-  <i>Le Bot WhatsApp rapide, modulaire et facile pour les développeurs.</i>
+  <img src="https://img.shields.io/badge/SECURITY-BYPASSED-red?style=for-the-badge" alt="Security">
+  <img src="https://img.shields.io/badge/STABILITY-ENCRYPTED-green?style=for-the-badge" alt="Stability">
+  <img src="https://img.shields.io/badge/VERSION-3.0.4--STABLE-blue?style=for-the-badge" alt="Version">
 </p>
 
 <p align="center">
-  <a href="https://github.com/stephdev12/REN-MDX/fork">
-    <img src="https://img.shields.io/badge/FORK-REPO-black?style=for-the-badge&logo=github" alt="Fork Repo">
-  </a>
-  <a href="https://github.com/stephdev12/REN-MDX/archive/refs/heads/main.zip">
-    <img src="https://img.shields.io/badge/DOWNLOAD-ZIP-blue?style=for-the-badge&logo=download" alt="Download Zip">
-  </a>
+  <b>Advanced WhatsApp Modular Framework for Cyber-Operators.</b><br>
+  <i>L'interface de contrôle ultime pour la gestion de flux WhatsApp.</i>
 </p>
-
-<hr/>
-
-## 🌟 Features / Fonctionnalités
-
-- **⚡ Fast & Optimized:** Uses `gifted-baileys` with stripped history sync for instant startup.
-- **🔌 Auto-Pairing:** No QR Code scan needed in terminal! Just run and enter your number.
-- **🛠️ Modular:** Command structure is simple (`module.exports`).
-- **🛡️ Secure:** Built-in Group Protections (AntiLink, AntiSpam, AntiDelete...).
-- **🌍 Multi-Language:** Dynamic language switching (`fr`, `en`...).
-- **⚙️ Customizable:** Easily editable `config.js` and `.env`.
 
 ---
 
-## 🚀 Deployment / Déploiement
+## 🖥️ [ SYSTEM_MANIFESTO ]
 
-### 📦 1. Panel (Pterodactyl, Sen-Host, etc.)
+**RICHI-MD** n'est pas qu'un simple bot. C'est un **noyau (kernel)** conçu pour l'efficacité, la discrétion et la puissance. Basé sur l'architecture `gifted-baileys`, il permet une intrusion légère et une gestion modulaire des paquets de données.
 
-It's the easiest way to host the bot 24/7.
-*C'est la façon la plus simple d'héberger le bot 24/7.*
+### ⚡ Core Capabilities / Capacités du Noyau
+* 🔓 **ViewOnce Bypass** : Interception et extraction furtive des flux à vue unique vers les archives privées.
+* 🛡️ **Hardened Shield** : Protection active contre le spam, les liens malveillants et les tentatives d'exécution distante.
+* 🔌 **Neural Pairing** : Connexion instantanée via code d'appairage sécurisé (No QR needed).
+* 🧠 **Fast-Load Logic** : Démarrage à froid en moins de 3 secondes.
 
-1.  **Upload & Extract:** Upload the `REN-MDX` zip file to your panel and extract it.
-2.  **Create Configuration:** Create a file named `.env` in the root folder and fill it:
-    *Créez un fichier nommé `.env` à la racine et remplissez-le :*
+---
 
-    ```env
-    BOT_NAME=REN-MDX
-    OWNER_NAME=TonNom
-    OWNER_NUMBER=237xxxxxxxxx
-    PREFIX=.
-    SESSION_NAME=session
-    DEFAULT_LANG=fr
-    # Optional / Optionnel
-    AUTO_READ=false
-    NEWSLETTER_JID=120363420601379038@newsletter
-    ```
+## 🚀 [ DEPLOYMENT_PROTOCOLS ]
 
-3.  **Install & Start:**
-    *   Go to "Startup" tab (or Console).
-    *   Run command: `npm install && npm start`
-    *   **Auto-Pairing:** The console will ask for your number if no session exists.
+### 📡 Option A : Cloud Interface (Render / Koyeb / Heroku)
+> **STATUS:** RECOMMANDÉ POUR 24/7 OPS
 
-### 📱 2. Termux (Android)
+1. **FORK** ce dépôt sur votre profil GitHub.
+2. Connectez votre compte à la plateforme de votre choix.
+3. Configurez les **Variables d'Environnement (Env Vars)** :
 
-Perfect for testing or local hosting.
-*Parfait pour tester ou héberger localement.*
+| VARIABLE | DESCRIPTION | VALEUR |
+| :--- | :--- | :--- |
+| `OWNER_NUMBER` | Identifiant opérateur | `242xxxxxxxxx` |
+| `BOT_NAME` | Nom du noyau | `RICHI-MD` |
+| `PREFIX` | Clé d'accès | `.` |
+| `DEFAULT_LANG` | Langue du système | `fr` |
 
+### 📟 Option B : Terminal Local (Termux / Linux / VPS)
 ```bash
-apt update && apt upgrade
-pkg install git nodejs ffmpeg
-git clone https://github.com/stephdev12/REN-MDX.git
-cd REN-MDX
+pkg update && pkg upgrade -y
+pkg install git nodejs-lts ffmpeg -y
+git clone [https://github.com/votre-user/RICHI-MD.git](https://github.com/votre-user/RICHI-MD.git)
+cd RICHI-MD
 npm install
 npm start
-```
-
----
-
-## 👨‍💻 For Developers / Pour les Devs
-
-Adding a command is super simple. Create a file in `plugins/category/mycmd.js`:
-*Ajouter une commande est super simple. Créez un fichier dans `plugins/...` :*
-
-```javascript
-module.exports = {
-  name: 'mycmd',
-  category: 'misc',
-  description: 'Test command',
-  usage: '.mycmd',
-  
-  // Flags
-  ownerOnly: false,
-  groupOnly: false,
-
-  execute: async (client, message, args) => {
-    await client.sendMessage(message.key.remoteJid, { text: 'It works!' });
-  }
-};
-```
-
----
-
-## 📞 Support & Credits
-
-*   **Created by:** SEN STUDIO
-*   **Support Channel:** [Join WhatsApp Channel](https://whatsapp.com/channel/0029VbAK3nYEquiZ3Ajpd90f)
-
----
-
-## ⚠️ Disclaimer
-
-This bot was created for educational purposes using an unofficial WhatsApp API. The developer is not responsible for any misuse, account bans, or damages caused by this software. Use at your own risk.
-
-*Ce bot a été créé à des fins éducatives en utilisant une API WhatsApp non officielle. Le développeur n'est pas responsable des mauvaises utilisations, des bannissements de compte ou des dommages causés par ce logiciel. Utilisez-le à vos propres risques.*

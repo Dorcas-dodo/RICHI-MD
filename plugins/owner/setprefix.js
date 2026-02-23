@@ -1,21 +1,42 @@
-// ⚙️ Plugin: SETPREFIX
+// ⌨️ Plugin: RICHI-MD PREFIX OVERRIDE
+// Description: Reconfiguration de la clé d'accès aux commandes du noyau
+
 const { updateSetting } = require('../../lib/database');
-const { t } = require('../../lib/language');
 
 module.exports = {
-  name: 'setprefix',
-  aliases: ['prefix'],
-  category: 'owner',
-  description: 'Change le préfixe du bot',
-  usage: '.setprefix <symbole>',
-  
-  ownerOnly: true,
+    name: 'setprefix',
+    aliases: ['prefix', 'setpref'],
+    category: 'owner',
+    description: 'Modifie le symbole de déclenchement des protocoles',
+    usage: 'setprefix <symbole>',
+    
+    ownerOnly: true,
 
-  execute: async (client, message, args) => {
-    const newPrefix = args[0];
-    if (!newPrefix) return client.sendMessage(message.key.remoteJid, { text: t('owner.error_arg') }, { quoted: message });
+    execute: async (sock, message, args, msgOptions) => {
+        const { remoteJid } = msgOptions;
+        const newPrefix = args[0];
 
-    updateSetting('prefix', newPrefix);
-    await client.sendMessage(message.key.remoteJid, { text: t('owner.prefix_changed', { prefix: newPrefix }) }, { quoted: message });
-  }
+        // 1. Validation de la clé d'entrée
+        if (!newPrefix) {
+            return sock.sendMessage(remoteJid, { 
+                text: `*── [ ⚠️ INPUT_REQUIRED ] ──*\n\nAucun symbole détecté. Veuillez fournir la nouvelle clé d'accès (ex: !, ., /).` 
+            }, { quoted: message });
+        }
+
+        // 2. Réaction de reconfiguration binaire
+        await sock.sendMessage(remoteJid, { react: { text: "🔑", key: message.key } });
+
+        // 3. Injection dans les registres du noyau
+        updateSetting('prefix', newPrefix);
+
+        // 4. Rapport de déploiement de la nouvelle clé
+        const report = `*─── 『 RICHI-MD CORE 』 ───*\n\n`
+            + `*🛠️ MODULE :* ACCESS_KEY_RECONFIG\n`
+            + `*⌨️ NEW_PREFIX :* [ ${newPrefix} ]\n`
+            + `*📊 STATUS :* ENCRYPTION_UPDATED\n\n`
+            + `*Note :* Toutes les commandes devront désormais être précédées du symbole "${newPrefix}" pour être interprétées par le noyau.\n\n`
+            + `*© ACCESS_PROTOCOL_REWRITTEN*`;
+
+        await sock.sendMessage(remoteJid, { text: report }, { quoted: message });
+    }
 };

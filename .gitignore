@@ -1,8 +1,21 @@
+# Dépendances (Le plus lourd, à ignorer absolument)
 node_modules/
+
+# Session & Authentification (CRITIQUE : Ne jamais uploader)
 session/
-package-lock.json
+auth_info_baileys/
 .env
-.DS_Store
-npm-debug.log
+
+# Base de données et fichiers temporaires
 database/
 temp/
+*.db
+
+# Logs et Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# Dossiers système
+.cache/

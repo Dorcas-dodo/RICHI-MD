@@ -1,46 +1,52 @@
-// 🏷️ Plugin: TAGGING
-const { t } = require('../../lib/language');
+// 🏷️ Plugin: RICHI-MD TAGGING SYSTEM
+// Description: Protocoles de notification de masse
 
 module.exports = [
     {
         name: 'tagall',
-        aliases: ['everyone'],
+        aliases: ['everyone', 'all'],
         category: 'group',
-        description: 'Tag tout le monde',
+        description: 'Mentionne tous les membres du secteur visiblement',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
-            const metadata = await client.groupMetadata(message.key.remoteJid);
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
+            const metadata = await sock.groupMetadata(remoteJid);
             const participants = metadata.participants.map(p => p.id);
-            const msg = args.join(' ');
+            const inputMsg = args.join(' ') || 'Alerte générale';
             
-            let list = '';
-            participants.forEach(p => list += `@${p.split('@')[0]}\n`);
+            let list = `*─── 『 RICHI-MD TAGALL 』 ───*\n\n*📢 Message:* ${inputMsg}\n\n`;
+            for (let p of participants) {
+                list += `👤 @${p.split('@')[0]}\n`;
+            }
+            list += `\n*──────────────────────*`;
             
-            await client.sendMessage(message.key.remoteJid, { 
-                text: t('group.tagall', { msg, list }), 
+            await sock.sendMessage(remoteJid, { 
+                text: list, 
                 mentions: participants 
             }, { quoted: message });
         }
     },
     {
         name: 'hidetag',
-        aliases: ['ht'],
+        aliases: ['ht', 'ghosttag'],
         category: 'group',
-        description: 'Tag invisible',
+        description: 'Notification fantôme (Tag invisible)',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
-            const metadata = await client.groupMetadata(message.key.remoteJid);
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
+            const metadata = await sock.groupMetadata(remoteJid);
             const participants = metadata.participants.map(p => p.id);
-            const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
             
-            if (quoted) {
-                // Pour faire simple, on renvoie le texte s'il y en a
-                const text = args.join(' ') || "Start";
-                await client.sendMessage(message.key.remoteJid, { text, mentions: participants });
-            } else {
-                const text = args.join(' ') || "Tag";
-                await client.sendMessage(message.key.remoteJid, { text, mentions: participants });
-            }
+            // On récupère soit le message répondu, soit le texte après la commande
+            const text = args.join(' ') || 'Notification système';
+
+            await sock.sendMessage(remoteJid, { react: { text: "👻", key: message.key } });
+
+            // Envoi du message avec mentions invisibles
+            await sock.sendMessage(remoteJid, { 
+                text: text, 
+                mentions: participants 
+            });
         }
     }
 ];

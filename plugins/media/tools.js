@@ -1,46 +1,72 @@
-// 🖼️ Plugin: MEDIA TOOLS
-// Conversions d'images/stickers
+// 🖼️ Plugin: RICHI-MD MEDIA DECODER
+// Description: Conversion de protocoles média (Sticker -> Image)
 
 const { downloadContentFromMessage } = require('gifted-baileys');
-const { t } = require('../../lib/language');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const { getRandom } = require('../../lib/functions');
 
 module.exports = [
     {
         name: 'toimg',
-        aliases: ['img'],
+        aliases: ['img', 'extract'],
         category: 'media',
-        description: 'Sticker vers Image',
-        usage: '.toimg (répondre à un sticker)',
-        execute: async (client, message, args) => {
+        description: 'Extrait une image à partir d\'un sticker',
+        usage: 'toimg (en répondant à un sticker)',
+        
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-            if (!quoted || !quoted.stickerMessage) return client.sendMessage(message.key.remoteJid, { text: t('tools.no_media') });
 
-            await client.sendMessage(message.key.remoteJid, { react: { text: '🔄', key: message.key } });
+            // Vérification si c'est bien un sticker
+            if (!quoted || !quoted.stickerMessage) {
+                return sock.sendMessage(remoteJid, { 
+                    text: `*── [ ⚠️ ALERTE ] ──*\n\nNégatif. Veuillez cibler un *Sticker* pour lancer l'extraction d'image.` 
+                });
+            }
+
+            // Réaction de décodage
+            await sock.sendMessage(remoteJid, { react: { text: '💾', key: message.key } });
 
             try {
+                // Téléchargement du flux WebP
                 const stream = await downloadContentFromMessage(quoted.stickerMessage, 'sticker');
                 let buffer = Buffer.from([]);
                 for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-                const inputPath = path.join(__dirname, `../../temp/${Math.floor(Math.random() * 10000)}.webp`);
-                const outputPath = path.join(__dirname, `../../temp/${Math.floor(Math.random() * 10000)}.png`);
+                // Définition des dossiers temporaires
+                const tempDir = path.join(__dirname, '../../temp');
+                if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+
+                const fileName = `Richi_${Date.now()}`;
+                const inputPath = path.join(tempDir, `${fileName}.webp`);
+                const outputPath = path.join(tempDir, `${fileName}.png`);
 
                 fs.writeFileSync(inputPath, buffer);
 
+                // Conversion via FFMPEG (Décodage cybernétique)
                 exec(`ffmpeg -i "${inputPath}" "${outputPath}"`, async (err) => {
-                    fs.unlinkSync(inputPath);
-                    if (err) return client.sendMessage(message.key.remoteJid, { text: t('tools.sticker_error') });
+                    // Nettoyage du fichier source immédiatement
+                    if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
 
-                    await client.sendMessage(message.key.remoteJid, { image: { url: outputPath } }, { quoted: message });
-                    fs.unlinkSync(outputPath);
+                    if (err) {
+                        console.error(err);
+                        return sock.sendMessage(remoteJid, { text: `*❌ ERREUR :* Échec du décodage du flux binaire.` });
+                    }
+
+                    // Envoi de l'image extraite
+                    await sock.sendMessage(remoteJid, { 
+                        image: { url: outputPath },
+                        caption: `*─── 『 RICHI-MD DECODER 』 ───*\n\n*✅ Extraction terminée.*\n*Flux converti en PNG.*`
+                    }, { quoted: message });
+
+                    // Nettoyage final
+                    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
                 });
 
             } catch (e) {
-                client.sendMessage(message.key.remoteJid, { text: t('tools.sticker_error') });
+                console.error('Media Tool Error:', e);
+                sock.sendMessage(remoteJid, { text: `*❌ ERREUR CRITIQUE :* Noyau de conversion instable.` });
             }
         }
     }

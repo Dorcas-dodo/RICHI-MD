@@ -1,121 +1,85 @@
-// 👁️ Plugin: VIEWONCE (Logic from SEN)
-// Récupère les messages à vue unique (V1, V2, Direct)
+// 👁️ Plugin: RICHI-MD DATA LEAK (ViewOnce Bypass - Private Mode)
+// Description: Intercepte et envoie les médias V1/V2 directement en privé
 
 const { downloadContentFromMessage } = require('gifted-baileys');
-const { t } = require('../../lib/language');
 const config = require('../../config');
 
 module.exports = {
     name: 'viewonce',
-    aliases: ['vv', 'reveal'],
+    aliases: ['vv', 'reveal', 'antiviewonce'],
     category: 'tools',
-    description: 'Récupère un message à vue unique',
-    usage: '.vv [private]',
+    description: 'Extrait et envoie les médias à vue unique en privé',
+    usage: 'vv (en réponse à un média)',
 
-    groupOnly: false,
-    ownerOnly: false,
-    adminOnly: false,
+    execute: async (sock, message, args, msgOptions) => {
+        const { remoteJid } = msgOptions;
 
-    execute: async (client, message, args) => {
         try {
-            const isPrivate = args[0]?.toLowerCase() === 'private' || args[0]?.toLowerCase() === 'p';
             const quoted = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
             
-            if (!quoted) return client.sendMessage(message.key.remoteJid, { text: t('tools.no_viewonce') }, { quoted: message });
-
-            // --- LOGIQUE DE DÉTECTION (SEN) ---
-            
-            // 1. Vérifier les 3 formats possibles
-            const quotedImage = quoted.imageMessage;
-            const quotedVideo = quoted.videoMessage;
-            const quotedAudio = quoted.audioMessage;
-            
-            // Format viewOnceV2 ou viewOnceV1
-            const viewOnceV2 = quoted.viewOnceMessageV2?.message;
-            const viewOnceV1 = quoted.viewOnceMessage?.message;
-            const viewOnceContainer = viewOnceV2 || viewOnceV1;
-
-            let mediaMessage = null;
-            let mediaType = null;
-            let isViewOnce = false;
-
-            // FORMAT 1 : Vue unique classique (conteneur)
-            if (viewOnceContainer) {
-                if (viewOnceContainer.imageMessage) {
-                    mediaMessage = viewOnceContainer.imageMessage;
-                    mediaType = 'image';
-                    isViewOnce = true;
-                } else if (viewOnceContainer.videoMessage) {
-                    mediaMessage = viewOnceContainer.videoMessage;
-                    mediaType = 'video';
-                    isViewOnce = true;
-                } else if (viewOnceContainer.audioMessage) {
-                    mediaMessage = viewOnceContainer.audioMessage;
-                    mediaType = 'audio';
-                    isViewOnce = true;
-                }
-            }
-            // FORMAT 2 : Vue unique dévoilée (flag direct)
-            else if (quotedImage && quotedImage.viewOnce) {
-                mediaMessage = quotedImage;
-                mediaType = 'image';
-                isViewOnce = true;
-            } else if (quotedVideo && quotedVideo.viewOnce) {
-                mediaMessage = quotedVideo;
-                mediaType = 'video';
-                isViewOnce = true;
-            } else if (quotedAudio && quotedAudio.viewOnce) {
-                mediaMessage = quotedAudio;
-                mediaType = 'audio';
-                isViewOnce = true;
+            if (!quoted) {
+                return sock.sendMessage(remoteJid, { 
+                    text: `*── [ ⚠️ NO_DATA ] ──*\n\nVeuillez cibler un message à vue unique.` 
+                });
             }
 
-            if (!isViewOnce || !mediaMessage) {
-                return client.sendMessage(message.key.remoteJid, { text: t('tools.not_viewonce') }, { quoted: message });
+            // Détection du contenu (V1 ou V2)
+            const v2 = quoted.viewOnceMessageV2?.message;
+            const v1 = quoted.viewOnceMessage?.message;
+            const container = v2 || v1;
+
+            let mediaMsg = null;
+            let type = null;
+
+            if (container) {
+                type = Object.keys(container)[0].replace('Message', '');
+                mediaMsg = container[Object.keys(container)[0]];
+            } else if (quoted.imageMessage?.viewOnce || quoted.videoMessage?.viewOnce || quoted.audioMessage?.viewOnce) {
+                type = Object.keys(quoted)[0].replace('Message', '');
+                mediaMsg = quoted[Object.keys(quoted)[0]];
             }
 
-            // Réaction seulement si PAS privé
-            if (!isPrivate) {
-                await client.sendMessage(message.key.remoteJid, { react: { text: '🔓', key: message.key } });
+            if (!mediaMsg) {
+                return sock.sendMessage(remoteJid, { 
+                    text: `*── [ ⚠️ ERROR ] ──*\n\nFlux à vue unique non détecté.` 
+                });
             }
 
-            // --- TÉLÉCHARGEMENT ---
-            const stream = await downloadContentFromMessage(mediaMessage, mediaType);
+            // Réaction discrète
+            await sock.sendMessage(remoteJid, { react: { text: '🕵️', key: message.key } });
+
+            // Extraction
+            const stream = await downloadContentFromMessage(mediaMsg, type);
             let buffer = Buffer.from([]);
-            for await (const chunk of stream) {
-                buffer = Buffer.concat([buffer, chunk]);
-            }
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-            const caption = t('tools.viewonce_caption') + (mediaMessage.caption ? `\n\n📝 ${mediaMessage.caption}` : '');
-
-            // Détermination de la cible (Chat actuel ou Owner)
-            const targetJid = isPrivate ? (config.ownerNumber[0] + '@s.whatsapp.net') : message.key.remoteJid;
+            // --- CONFIGURATION DE LA DESTINATION PRIVÉE ---
+            // On récupère ton propre numéro (le propriétaire du bot)
+            const myJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
             
-            // Si privé, on ne cite pas le message d'origine pour éviter les notifications bizarres
-            const quotedMsg = isPrivate ? null : message;
+            const caption = `*─── 『 RICHI-MD PRIVATE REVEAL 』 ───*\n\n*📂 TYPE :* ${type.toUpperCase()}\n*📡 ORIGINE :* ${remoteJid.endsWith('@g.us') ? 'GROUPE' : 'PRIVÉ'}\n${mediaMsg.caption ? `*📝 CAPTION :* ${mediaMsg.caption}` : ''}\n\n*© GHOST_INTERCEPT_SUCCESS*`;
 
-            // --- ENVOI ---
-            if (mediaType === 'image') {
-                await client.sendMessage(targetJid, { 
-                    image: buffer, 
-                    caption: caption 
-                }, { quoted: quotedMsg });
-            } else if (mediaType === 'video') {
-                await client.sendMessage(targetJid, { 
-                    video: buffer, 
-                    caption: caption 
-                }, { quoted: quotedMsg });
-            } else if (mediaType === 'audio') {
-                await client.sendMessage(targetJid, { 
-                    audio: buffer, 
-                    mimetype: mediaMessage.mimetype || 'audio/mpeg',
-                    ptt: false
-                }, { quoted: quotedMsg });
+            const finalMsg = {};
+            if (type === 'audio') {
+                finalMsg.audio = buffer;
+                finalMsg.mimetype = 'audio/mpeg';
+                finalMsg.ptt = false;
+            } else {
+                finalMsg[type] = buffer;
+                finalMsg.caption = caption;
             }
+
+            // 1. ENVOI EN PRIVÉ (Chez toi)
+            await sock.sendMessage(myJid, finalMsg);
+
+            // 2. Notification dans la conversation actuelle (pour savoir que c'est fait)
+            await sock.sendMessage(remoteJid, { 
+                text: `*✅ Média intercepté !* Vérifie tes messages privés pour voir le contenu.` 
+            }, { quoted: message });
 
         } catch (error) {
-            console.error(error);
-            client.sendMessage(message.key.remoteJid, { text: t('tools.sticker_error') }, { quoted: message });
+            console.error('ViewOnce Error:', error);
+            sock.sendMessage(remoteJid, { text: `*❌ ERREUR :* Échec de l'interception furtive.` });
         }
     }
 };

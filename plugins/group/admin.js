@@ -1,70 +1,102 @@
-const { t } = require('../../lib/language');
+// 🏢 Plugin: RICHI-MD GROUP MANAGER
+// Description: Contrôle des protocoles et nettoyage de secteur
+
+const config = require('../../config');
 
 module.exports = [
     {
         name: 'kick',
-        aliases: ['remove', 'ban'],
+        aliases: ['remove'],
         category: 'group',
-        description: 'Retire un membre',
+        description: 'Éjecte un membre du secteur',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const target = message.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.participant;
-            if (!target) return client.sendMessage(message.key.remoteJid, { text: t('group.error_who') });
-            await client.groupParticipantsUpdate(message.key.remoteJid, [target], 'remove');
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+            if (!target) return sock.sendMessage(remoteJid, { text: `*── [ ⚠️ ] ──*\nCible non identifiée.` });
+            await sock.groupParticipantsUpdate(remoteJid, [target], 'remove');
+            await sock.sendMessage(remoteJid, { react: { text: "☣️", key: message.key } });
+        }
+    },
+    {
+        name: 'purge',
+        aliases: ['wipeout', 'kickall'],
+        category: 'group',
+        description: 'Protocole d\'éjection massive (OWNER ONLY)',
+        groupOnly: true, ownerOnly: true,
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid, isBotAdmin, pushName } = msgOptions;
+            if (!isBotAdmin) return sock.sendMessage(remoteJid, { text: `*── [ ❌ ] ──*\nLe système doit être admin.` });
+
+            await sock.sendMessage(remoteJid, { text: `*── [ ⚠️ PURGE ] ──*\n\nInitialisation par *${pushName}*...\nNettoyage du secteur en cours.` });
+            
+            const groupMetadata = await sock.groupMetadata(remoteJid);
+            const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net';
+            const targets = groupMetadata.participants
+                .map(p => p.id)
+                .filter(id => id !== botNumber && !config.ownerNumber.includes(id.split('@')[0]));
+
+            for (let jid of targets) {
+                await sock.groupParticipantsUpdate(remoteJid, [jid], 'remove');
+                await new Promise(resolve => setTimeout(resolve, 800)); // Anti-Ban
+            }
+            await sock.sendMessage(remoteJid, { text: `*── [ ✅ ] ──*\nSecteur purifié.` });
         }
     },
     {
         name: 'add',
         aliases: ['invite'],
         category: 'group',
-        description: 'Ajoute un membre',
+        description: 'Injecte un nouveau membre',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const num = args[0]?.replace(/[^0-9]/g, '');
-            if (!num) return client.sendMessage(message.key.remoteJid, { text: t('owner.error_arg') });
+            if (!num) return sock.sendMessage(remoteJid, { text: `*── [ ⚠️ ] ──*\nMatricule manquant.` });
             const target = num + '@s.whatsapp.net';
-            await client.groupParticipantsUpdate(message.key.remoteJid, [target], 'add');
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+            await sock.groupParticipantsUpdate(remoteJid, [target], 'add');
+            await sock.sendMessage(remoteJid, { react: { text: "📥", key: message.key } });
         }
     },
     {
         name: 'promote',
         aliases: ['admin'],
         category: 'group',
-        description: 'Promeut un membre admin',
+        description: 'Accorde les privilèges admin',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const target = message.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.participant;
-            if (!target) return client.sendMessage(message.key.remoteJid, { text: t('group.error_who') });
-            await client.groupParticipantsUpdate(message.key.remoteJid, [target], 'promote');
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+            if (!target) return sock.sendMessage(remoteJid, { text: `*── [ ⚠️ ] ──*\nCible non identifiée.` });
+            await sock.groupParticipantsUpdate(remoteJid, [target], 'promote');
+            await sock.sendMessage(remoteJid, { react: { text: "🛡️", key: message.key } });
         }
     },
     {
         name: 'demote',
         aliases: ['unadmin'],
         category: 'group',
-        description: 'Rétrograde un admin',
+        description: 'Rétrograde un superviseur',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const target = message.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || message.message?.extendedTextMessage?.contextInfo?.quotedMessage?.participant;
-            if (!target) return client.sendMessage(message.key.remoteJid, { text: t('group.error_who') });
-            await client.groupParticipantsUpdate(message.key.remoteJid, [target], 'demote');
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+            if (!target) return sock.sendMessage(remoteJid, { text: `*── [ ⚠️ ] ──*\nCible non identifiée.` });
+            await sock.groupParticipantsUpdate(remoteJid, [target], 'demote');
+            await sock.sendMessage(remoteJid, { react: { text: "📉", key: message.key } });
         }
     },
     {
         name: 'gname',
         aliases: ['setname'],
         category: 'group',
-        description: 'Change le nom du groupe',
+        description: 'Change le nom du secteur',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const name = args.join(' ');
-            if (!name) return;
-            await client.groupUpdateSubject(message.key.remoteJid, name);
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+            if (name) await sock.groupUpdateSubject(remoteJid, name);
+            await sock.sendMessage(remoteJid, { react: { text: "📝", key: message.key } });
         }
     },
     {
@@ -73,33 +105,35 @@ module.exports = [
         category: 'group',
         description: 'Change la description',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const desc = args.join(' ');
-            if (!desc) return;
-            await client.groupUpdateDescription(message.key.remoteJid, desc);
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+            if (desc) await sock.groupUpdateDescription(remoteJid, desc);
+            await sock.sendMessage(remoteJid, { react: { text: "📜", key: message.key } });
         }
     },
     {
         name: 'glink',
         aliases: ['invitelink'],
         category: 'group',
-        description: 'Récupère le lien du groupe',
-        groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
-            const code = await client.groupInviteCode(message.key.remoteJid);
-            client.sendMessage(message.key.remoteJid, { text: t('group.glink', { link: `https://chat.whatsapp.com/${code}` }) });
+        description: 'Récupère le point d\'accès',
+        groupOnly: true,
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
+            const code = await sock.groupInviteCode(remoteJid);
+            await sock.sendMessage(remoteJid, { text: `*── [ RICHI-MD LINK ] ──*\n\nhttps://chat.whatsapp.com/${code}` }, { quoted: message });
         }
     },
     {
         name: 'revoke',
         aliases: ['resetlink'],
         category: 'group',
-        description: 'Réinitialise le lien du groupe',
+        description: 'Réinitialise le lien',
         groupOnly: true, adminOnly: true,
-        execute: async (client, message, args) => {
-            await client.groupRevokeInvite(message.key.remoteJid);
-            await client.sendMessage(message.key.remoteJid, { react: { text: "✅", key: message.key } });
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
+            await sock.groupRevokeInvite(remoteJid);
+            await sock.sendMessage(remoteJid, { react: { text: "🔐", key: message.key } });
         }
     }
 ];

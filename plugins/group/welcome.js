@@ -1,55 +1,69 @@
+// 🚪 Plugin: RICHI-MD GREETING SYSTEM
+// Description: Gestion des protocoles d'entrée dans le secteur
+
 const { updateGroupSetting, getGroupSettings } = require('../../lib/database');
-const { t } = require('../../lib/language');
 
 module.exports = [
     {
         name: 'welcome',
-        aliases: [],
+        aliases: ['bienvenue'],
         category: 'group',
-        description: 'Active/Désactive le message de bienvenue',
-        usage: '.welcome <on/off>',
+        description: 'Active ou désactive l\'accueil des nouveaux sujets',
+        usage: 'welcome <on/off>',
         
         groupOnly: true,
         adminOnly: true,
 
-        execute: async (client, message, args) => {
-            const chatId = message.key.remoteJid;
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const setting = args[0]?.toLowerCase();
-            const currentConfig = getGroupSettings(chatId);
+            const currentConfig = getGroupSettings(remoteJid);
 
+            // Statut si aucun argument
             if (!setting) {
-                return client.sendMessage(chatId, { text: t('group.welcome_init', { status: currentConfig.welcome ? 'on' : 'off' }) }, { quoted: message });
+                const status = currentConfig.welcome ? 'OPÉRATIONNEL' : 'MIS EN VEILLE';
+                return sock.sendMessage(remoteJid, { 
+                    text: `*─── 『 RICHI-MD WELCOME 』 ───*\n\n*📊 Statut :* ${status}\n\n*Usage :* .welcome on | off` 
+                }, { quoted: message });
             }
 
-            if (setting === 'on') {
-                updateGroupSetting(chatId, 'welcome', true);
-                return client.sendMessage(chatId, { text: t('group.welcome_on') }, { quoted: message });
-            }
-
-            if (setting === 'off') {
-                updateGroupSetting(chatId, 'welcome', false);
-                return client.sendMessage(chatId, { text: t('group.welcome_off') }, { quoted: message });
+            if (setting === 'on' || setting === 'off') {
+                const isEnabled = setting === 'on';
+                updateGroupSetting(remoteJid, 'welcome', isEnabled);
+                
+                await sock.sendMessage(remoteJid, { react: { text: isEnabled ? "✅" : "❌", key: message.key } });
+                return sock.sendMessage(remoteJid, { 
+                    text: `*── [ ⚡ CONFIGURÉ ] ──*\n\nProtocole d'accueil désormais *${setting.toUpperCase()}*.` 
+                });
             }
         }
     },
     {
         name: 'setwelcome',
-        aliases: [],
+        aliases: ['setw'],
         category: 'group',
-        description: 'Configure le message de bienvenue',
-        usage: '.setwelcome <message> (@user, @group, @desc)',
+        description: 'Configure le message d\'accueil personnalisé',
+        usage: 'setwelcome <message>',
         
         groupOnly: true,
         adminOnly: true,
 
-        execute: async (client, message, args) => {
-            const chatId = message.key.remoteJid;
+        execute: async (sock, message, args, msgOptions) => {
+            const { remoteJid } = msgOptions;
             const text = args.join(' ');
 
-            if (!text) return client.sendMessage(chatId, { text: t('owner.error_arg') }, { quoted: message });
+            if (!text) {
+                return sock.sendMessage(remoteJid, { 
+                    text: `*── [ ⚠️ ERREUR ] ──*\n\nVeuillez entrer le texte du protocole.\n\n*Variables disponibles :*\n- @user (Mention)\n- @group (Nom du groupe)\n- @desc (Description)` 
+                }, { quoted: message });
+            }
 
-            updateGroupSetting(chatId, 'welcomeMessage', text);
-            client.sendMessage(chatId, { text: t('group.welcome_set') }, { quoted: message });
+            updateGroupSetting(remoteJid, 'welcomeMessage', text);
+            
+            await sock.sendMessage(remoteJid, { react: { text: "📝", key: message.key } });
+            return sock.sendMessage(remoteJid, { 
+                text: `*── [ ✅ MIS À JOUR ] ──*\n\nNouveau protocole d'accueil enregistré avec succès.` 
+            });
         }
     }
 ];
