@@ -43,6 +43,7 @@ SESSION_NAME=session
 DEFAULT_LANG=fr
 AUTO_READ=false
 ANTILINK=true
+
 ## ☁️ I. Déploiement Cloud (Render / Koyeb)
 ### 1.Fork ce repo sur ton compte GitHub.
 
@@ -51,6 +52,7 @@ ANTILINK=true
 3.Lie ton repo GitHub et ajoute les variables du bloc .env ci-dessus dans la section Environment Variables du site.
 
 4.Lance le "Deploy".
+
 ## 🖥️ II. Déploiement Panel (Pterodactyl / Sen-Host)
 ### Upload les fichiers du bot sur ton panel.
 
@@ -58,13 +60,16 @@ Dans l'onglet Startup, vérifie que la commande de lancement est bien npm start.
 
 Configure le .env directement via le gestionnaire de fichiers du panel.
 ## 📱 III. Déploiement Termux (Android)
+
 ### 1. apt update && apt upgrade
 2. pkg install git nodejs ffmpeg -y
 3. git clone [https://github.com/Dorcas-dodo/RICHI-MD.git](https://github.com/Dorcas-dodo/RICHI-MD.git)
 4. cd RICHI-MD
 5. npm install
 6. npm start
+
 ## 👨‍💻 For Developers / Pour les Devs
+
 ### const { performance } = require('perf_hooks');
 module.exports = {
   name: 'ping',
@@ -80,6 +85,7 @@ module.exports = {
     });
   }
 };
+
 ## 📞 Support & Credits
 Created by: RICHI_DEV
 
