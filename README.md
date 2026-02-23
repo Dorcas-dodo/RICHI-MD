@@ -22,42 +22,25 @@
 
 ## 🌟 Features / Fonctionnalités
 
-- **⚡ Fast & Optimized:** Utilise `gifted-baileys` avec un bypass du flux d'historique pour un démarrage éclair.
-- **🔌 Neural Pairing:** Aucun scan QR requis. Le noyau génère un code de jumelage sécurisé directement.
-- **🛡️ Hardened Shield:** Protections intégrées contre le spam, les liens malveillants et les appels (Anti-Call).
-- **🧠 ViewOnce Bypass:** Interception automatique des médias à vue unique.
+- **⚡ Fast & Optimized:** Utilise `gifted-baileys` pour un démarrage éclair.
+- **🔌 Neural Pairing:** Connexion directe par code d'appairage sans scan QR.
+- **🛡️ Hardened Shield:** Protection Anti-Call et Anti-Link intégrée.
+- **🧠 ViewOnce Bypass:** Capture automatique des médias éphémères.
 
 ---
 
 ## 🚀 Deployment / Déploiement
 
-### 📦 1. Cloud & Panels (Render, Koyeb, Pterodactyl)
-**Install & Start :**
-1. Configurez vos variables dans le fichier `.env`.
-2. Exécutez : `npm install && npm start`.
-3. **Auto-Pairing :** Le code s'affichera dans la console si aucune session n'est détectée.
+### 📦 1. Configuration des Variables (.env)
+Avant de lancer le bot, créez un fichier nommé `.env` et remplissez-le comme ceci :
 
-### 📱 2. Termux (Android)
-```bash
-apt update && apt upgrade
-pkg install git nodejs ffmpeg -y
-git clone [https://github.com/Dorcas-dodo/RICHI-MD.git](https://github.com/Dorcas-dodo/RICHI-MD.git)
-cd RICHI-MD
-npm install
-npm start
----
-
-## 📞 Support & Credits
-
-* **Created by:** RICHI_DEV
-* **Support Channel:** [Join WhatsApp Channel](https://whatsapp.com/channel/0029VbAK3nYEquiZ3Ajpd90f)
-
-<details>
-<summary><b>⚠️ Disclaimer (Cliquez pour lire)</b></summary>
-<br>
-Ce bot a été créé à des fins éducatives. Le développeur n'est pas responsable des mauvaises utilisations, des bannissements de compte ou des dommages causés. Utilisez-le à vos propres risques.
-</details>
-
-<p align="right">
-<i>Maintained by RICHI_DEV | 2026 Kernel v3.0.4</i>
-</p>
+```env
+BOT_NAME=RICHI-MD
+OWNER_NAME=RICHI_DEV
+OWNER_NUMBER=242068079834
+PREFIX=.
+SESSION_NAME=session
+DEFAULT_LANG=fr
+# Options
+AUTO_READ=false
+ANTILINK=true
