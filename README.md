@@ -34,7 +34,7 @@
 ### 📦 Configuration Initiale (.env)
 Avant de choisir une méthode ci-dessous, préparez vos variables d'environnement :
 
-```env```
+```env
 BOT_NAME=RICHI-MD
 OWNER_NAME=RICHI_DEV
 OWNER_NUMBER=242068079834
@@ -43,8 +43,8 @@ SESSION_NAME=session
 DEFAULT_LANG=fr
 AUTO_READ=false
 ANTILINK=true
-
-```## ☁️ I. Déploiement Cloud (Render / Koyeb)```
+```
+## ☁️ I. Déploiement Cloud (Render / Koyeb)```
 ### 1.Fork ce repo sur ton compte GitHub.
 
 2.Crée un compte sur Render ou Koyeb.
@@ -61,17 +61,18 @@ Dans l'onglet Startup, vérifie que la commande de lancement est bien npm start.
 Configure le .env directement via le gestionnaire de fichiers du panel.
 ## 📱 III. Déploiement Termux (Android)
 
-### 1. apt update && apt upgrade
+```1. apt update && apt upgrade
 2. pkg install git nodejs ffmpeg -y
 3. git clone [https://github.com/Dorcas-dodo/RICHI-MD.git](https://github.com/Dorcas-dodo/RICHI-MD.git)
 4. cd RICHI-MD
 5. npm install
 6. npm start
+```
 
 ## 👨‍💻 For Developers / Pour les Devs
 
 ### L'ajout de commandes est ultra-fluide. Créez un fichier dans plugins/system/ping.js :
-const { performance } = require('perf_hooks');
+```const { performance } = require('perf_hooks');
 module.exports = {
   name: 'ping',
   category: 'system',
@@ -86,7 +87,7 @@ module.exports = {
     });
   }
 };
-
+```
 ## 📞 Support & Credits
 Created by: RICHI_DEV
 
