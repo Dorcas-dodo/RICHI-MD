@@ -1,55 +1,102 @@
 <p align="center">
-  <img src="./ren.jpg" alt="RICHI-MD-CORE" width="100%" style="border-radius: 15px; border: 2px solid #00ff00; box-shadow: 0px 0px 20px #00ff00;"/>
+  <img src="./ren.jpg" alt="RICHI-MD-CORE" width="100%" style="border-radius: 15px; border: 2px solid #00ff00; box-shadow: 0px 0px 20px rgba(0, 255, 0, 0.5);"/>
 </p>
 
 <h1 align="center"><code> ⚠️ RICHI-MD : KERNEL_OVERRIDE ⚠️ </code></h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/SECURITY-BYPASSED-red?style=for-the-badge" alt="Security">
-  <img src="https://img.shields.io/badge/STABILITY-ENCRYPTED-green?style=for-the-badge" alt="Stability">
-  <img src="https://img.shields.io/badge/VERSION-3.0.4--STABLE-blue?style=for-the-badge" alt="Version">
+  <b>The Fast, Modular & Cyber-Operator WhatsApp Framework.</b><br>
+  <i>Le Bot WhatsApp rapide, modulaire et optimisé pour les développeurs.</i>
 </p>
 
 <p align="center">
-  <b>Advanced WhatsApp Modular Framework for Cyber-Operators.</b><br>
-  <i>L'interface de contrôle ultime pour la gestion de flux WhatsApp.</i>
+  <a href="https://github.com/Dorcas-dodo/RICHI-MD/fork">
+    <img src="https://img.shields.io/badge/FORK-REPO-black?style=for-the-badge&logo=github" alt="Fork Repo">
+  </a>
+  <a href="https://whatsapp.com/channel/0029VbAK3nYEquiZ3Ajpd90f">
+    <img src="https://img.shields.io/badge/JOIN-NETWORK-green?style=for-the-badge&logo=whatsapp" alt="Support">
+  </a>
 </p>
 
----
+<hr/>
 
-## 🖥️ [ SYSTEM_MANIFESTO ]
+## 🌟 Features / Fonctionnalités
 
-**RICHI-MD** n'est pas qu'un simple bot. C'est un **noyau (kernel)** conçu pour l'efficacité, la discrétion et la puissance. Basé sur l'architecture `gifted-baileys`, il permet une intrusion légère et une gestion modulaire des paquets de données.
-
-### ⚡ Core Capabilities / Capacités du Noyau
-* 🔓 **ViewOnce Bypass** : Interception et extraction furtive des flux à vue unique vers les archives privées.
-* 🛡️ **Hardened Shield** : Protection active contre le spam, les liens malveillants et les tentatives d'exécution distante.
-* 🔌 **Neural Pairing** : Connexion instantanée via code d'appairage sécurisé (No QR needed).
-* 🧠 **Fast-Load Logic** : Démarrage à froid en moins de 3 secondes.
+- **⚡ Fast & Optimized:** Utilise `gifted-baileys` avec un bypass du flux d'historique pour un démarrage éclair.
+- **🔌 Neural Pairing:** Aucun scan QR requis. Le noyau génère un code de jumelage sécurisé directement.
+- **🛡️ Hardened Shield:** Protections intégrées contre le spam, les liens malveillants et les appels (Anti-Call).
+- **🧠 ViewOnce Bypass:** Interception automatique des médias à vue unique.
+- **🌍 Multi-Language:** Support dynamique des langues (`fr`, `en`...).
 
 ---
 
-## 🚀 [ DEPLOYMENT_PROTOCOLS ]
+## 🚀 Deployment / Déploiement
 
-### 📡 Option A : Cloud Interface (Render / Koyeb / Heroku)
-> **STATUS:** RECOMMANDÉ POUR 24/7 OPS
+### 📦 1. Cloud & Panels (Render, Koyeb, Pterodactyl)
 
 1. **FORK** ce dépôt sur votre profil GitHub.
-2. Connectez votre compte à la plateforme de votre choix.
-3. Configurez les **Variables d'Environnement (Env Vars)** :
+2. Créez un fichier `.env` ou configurez les **Variables d'Environnement** :
 
-| VARIABLE | DESCRIPTION | VALEUR |
-| :--- | :--- | :--- |
-| `OWNER_NUMBER` | Identifiant opérateur | `242xxxxxxxxx` |
-| `BOT_NAME` | Nom du noyau | `RICHI-MD` |
-| `PREFIX` | Clé d'accès | `.` |
-| `DEFAULT_LANG` | Langue du système | `fr` |
+```env
+BOT_NAME=RICHI-MD
+OWNER_NAME=VotreNom
+OWNER_NUMBER=242xxxxxxxxx
+PREFIX=.
+SESSION_NAME=session
+DEFAULT_LANG=fr
+# Options
+AUTO_READ=false
+ANTILINK=true
 
-### 📟 Option B : Terminal Local (Termux / Linux / VPS)
-```bash
-pkg update && pkg upgrade -y
-pkg install git nodejs-lts ffmpeg -y
-git clone [https://github.com/votre-user/RICHI-MD.git](https://github.com/votre-user/RICHI-MD.git)
+Install & Start:
+
+Exécutez : npm install && npm start
+
+Auto-Pairing : Le code s'affichera dans la console si aucune session n'est détectée.
+
+📱 2. Termux (Android)
+Bash
+apt update && apt upgrade
+pkg install git nodejs ffmpeg -y
+git clone [https://github.com/Dorcas-dodo/RICHI-MD.git](https://github.com/Dorcas-dodo/RICHI-MD.git)
 cd RICHI-MD
 npm install
 npm start
+👨‍💻 For Developers / Pour les Devs
+L'ajout de commandes est ultra-fluide. Créez un fichier dans plugins/system/ping.js :
+
+JavaScript
+const { performance } = require('perf_hooks');
+
+module.exports = {
+  name: 'ping',
+  category: 'system',
+  description: 'Vérifie la latence du noyau',
+  execute: async (sock, m, args) => {
+    const start = performance.now();
+    const { key } = await sock.sendMessage(m.key.remoteJid, { text: '📡 *Signal Check...*' });
+    const end = performance.now();
+    const latency = (end - start).toFixed(2);
+
+    await sock.sendMessage(m.key.remoteJid, {
+      text: `🚀 *PONG !*\n\n🔹 *Vitesse :* ${latency} ms\n🔹 *Noyau :* RICHI-MD v3\n🔹 *Status :* Stable`,
+      edit: key 
+    });
+  }
+};
+📞 Support & Credits
+Created by: RICHI_DEV
+
+Original Architecture: SEN STUDIO
+
+Support Channel: Join WhatsApp Channel
+
+⚠️ Disclaimer
+Ce bot a été créé à des fins éducatives. Le développeur n'est pas responsable des mauvaises utilisations, des bannissements de compte ou des dommages causés. Utilisez-le à vos propres risques.
+
+<p align="right">
+<i>Maintained by RICHI_DEV | 2026 Kernel v3.0.4</i>
+</p>
+
+
+-----
