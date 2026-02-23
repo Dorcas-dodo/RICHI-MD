@@ -70,7 +70,8 @@ Configure le .env directement via le gestionnaire de fichiers du panel.
 
 ## 👨‍💻 For Developers / Pour les Devs
 
-### const { performance } = require('perf_hooks');
+### L'ajout de commandes est ultra-fluide. Créez un fichier dans plugins/system/ping.js :
+const { performance } = require('perf_hooks');
 module.exports = {
   name: 'ping',
   category: 'system',
