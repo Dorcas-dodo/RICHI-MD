@@ -34,7 +34,7 @@
 ### 📦 Configuration Initiale (.env)
 Avant de choisir une méthode ci-dessous, préparez vos variables d'environnement :
 
-```env
+```env```
 BOT_NAME=RICHI-MD
 OWNER_NAME=RICHI_DEV
 OWNER_NUMBER=242068079834
