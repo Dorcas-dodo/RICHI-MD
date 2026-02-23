@@ -5,11 +5,6 @@
 <h1 align="center"><code> ⚠️ RICHI-MD : KERNEL_OVERRIDE ⚠️ </code></h1>
 
 <p align="center">
-  <b>The Fast, Modular & Cyber-Operator WhatsApp Framework.</b><br>
-  <i>Le Bot WhatsApp rapide, modulaire et optimisé pour les développeurs.</i>
-</p>
-
-<p align="center">
   <a href="https://github.com/Dorcas-dodo/RICHI-MD/fork">
     <img src="https://img.shields.io/badge/FORK-REPO-black?style=for-the-badge&logo=github" alt="Fork Repo">
   </a>
@@ -32,6 +27,17 @@
 
 ---
 
+## 🔑 Étape 2 : Obtenir votre SESSION ID
+Pour lier votre compte WhatsApp, cliquez sur le bouton ci-dessous pour accéder à notre générateur de session sécurisé. Vous y trouverez un menu accueillant avec deux options : QR Code ou Pairing Code.
+
+<p align="center">
+<a href="TON_LIEN_DE_SESSION_ICI">
+<img src="https://img.shields.io/badge/OBTENIR-SESSION_ID-orange?style=for-the-badge&logo=render" width="250" alt="Get Session">
+</a>
+</p>
+
+[!TIP]
+Une fois le code obtenu : Copiez-le et collez-le dans votre fichier .env au niveau de la variable SESSION_NAME ou SESSION_ID.
 ## 🚀 Deployment / Déploiement
 
 ### 📦 Configuration Initiale (.env)
