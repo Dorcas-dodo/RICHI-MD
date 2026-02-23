@@ -27,7 +27,7 @@
 
 ---
 
-## 🔑 Étape 2 : Obtenir votre SESSION ID
+## 🔑: Obtenir votre SESSION ID
 Pour lier votre compte WhatsApp, cliquez sur le bouton ci-dessous pour accéder à notre générateur de session sécurisé. Vous y trouverez un menu accueillant avec deux options : QR Code ou Pairing Code.
 
 <p align="center">
