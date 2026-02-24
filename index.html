@@ -4,24 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RICHI-MD DEPLOYER</title>
+    
+    <meta property="og:title" content="RICHI-MD : DEPLOYMENT HUB">
+    <meta property="og:description" content="Générez votre session et déployez votre bot WhatsApp en un clic.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Dorcas-dodo/RICHI-MD/main/ren.jpg">
+
     <style>
         :root { --primary: #00ff00; --dark: #0f172a; --card: #1e293b; }
         body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; text-align: center; }
-        
         .container { max-width: 800px; margin: auto; }
-        .logo { width: 150px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 20px rgba(0,255,0,0.3); }
-        
+        .logo { width: 150px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 20px rgba(0,255,0,0.3); margin-top: 20px; }
         h1 { color: var(--primary); font-family: 'Courier New', monospace; letter-spacing: 2px; }
-        
         .section { background: var(--card); padding: 30px; border-radius: 15px; margin: 20px 0; border: 1px solid #334155; }
-        
         .btn { display: inline-block; padding: 15px 30px; margin: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: 0.3s; }
-        .btn-session { background: #f59e0b; } /* Orange */
-        .btn-koyeb { background: #000000; border: 1px solid #334155; } /* Noir */
-        .btn-render { background: #46a394; } /* Vert Render */
-        
-        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
-        
+        .btn-session { background: #f59e0b; }
+        .btn-koyeb { background: #000000; border: 1px solid #334155; }
+        .btn-render { background: #46a394; }
+        .btn:hover { transform: translateY(-3px); opacity: 0.9; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .step-number { background: var(--primary); color: black; padding: 5px 12px; border-radius: 50%; font-weight: bold; margin-right: 10px; }
     </style>
 </head>
@@ -35,7 +34,7 @@
     <div class="section">
         <h3><span class="step-number">1</span> OBTENIR LE SESSION ID</h3>
         <p>Avant de déployer, vous devez lier votre numéro WhatsApp.</p>
-        <a href="LIEN_DE_TON_GENERATEUR_SESSION" class="btn btn-session">GÉNÉRER MA SESSION (QR/PAIRING)</a>
+        <a href="https://significant-iolande-ushiwa-808bd466.koyeb.app/pairing" class="btn btn-session">GÉNÉRER MA SESSION (PAIRING CODE)</a>
     </div>
 
     <div class="section">
