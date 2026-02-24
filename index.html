@@ -10,18 +10,20 @@
     <meta property="og:image" content="https://raw.githubusercontent.com/Dorcas-dodo/RICHI-MD/main/ren.jpg">
 
     <style>
-        :root { --primary: #00ff00; --dark: #0f172a; --card: #1e293b; }
+        :root { --primary: #00ff00; --dark: #0f172a; --card: #1e293b; --qr-btn: #3b82f6; }
         body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; text-align: center; }
         .container { max-width: 800px; margin: auto; }
         .logo { width: 150px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 20px rgba(0,255,0,0.3); margin-top: 20px; }
         h1 { color: var(--primary); font-family: 'Courier New', monospace; letter-spacing: 2px; }
         .section { background: var(--card); padding: 30px; border-radius: 15px; margin: 20px 0; border: 1px solid #334155; }
-        .btn { display: inline-block; padding: 15px 30px; margin: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: 0.3s; }
-        .btn-session { background: #f59e0b; }
+        .btn { display: inline-block; padding: 15px 30px; margin: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: 0.3s; cursor: pointer; border: none; }
+        .btn-session { background: #f59e0b; } /* Orange */
+        .btn-qr { background: var(--qr-btn); } /* Bleu */
         .btn-koyeb { background: #000000; border: 1px solid #334155; }
         .btn-render { background: #46a394; }
         .btn:hover { transform: translateY(-3px); opacity: 0.9; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .step-number { background: var(--primary); color: black; padding: 5px 12px; border-radius: 50%; font-weight: bold; margin-right: 10px; }
+        .btn-group { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
     </style>
 </head>
 <body>
@@ -33,13 +35,18 @@
 
     <div class="section">
         <h3><span class="step-number">1</span> OBTENIR LE SESSION ID</h3>
-        <p>Avant de déployer, vous devez lier votre numéro WhatsApp.</p>
-        <a href="https://significant-iolande-ushiwa-808bd466.koyeb.app/pairing" class="btn btn-session">GÉNÉRER MA SESSION (PAIRING CODE)</a>
+        <p>Choisissez votre méthode de liaison WhatsApp :</p>
+        
+        <div class="btn-group">
+            <a href="/pairing" class="btn btn-session">📱 PAIRING CODE</a>
+            
+            <a href="/qr" class="btn btn-qr">📷 SCANNER QR</a>
+        </div>
     </div>
 
     <div class="section">
         <h3><span class="step-number">2</span> CHOISIR UN HÉBERGEUR</h3>
-        <p>Une fois votre session obtenue, cliquez sur un bouton pour déployer.</p>
+        <p>Une fois votre session obtenue (reçue sur WhatsApp), déployez le bot.</p>
         
         <a href="https://app.koyeb.com/deploy?type=git&repository=github.com/Dorcas-dodo/RICHI-MD&branch=main&name=richi-md" class="btn btn-koyeb">
             DÉPLOYER SUR KOYEB
