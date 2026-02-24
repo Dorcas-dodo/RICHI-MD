@@ -1,4 +1,4 @@
-// 🌐 RICHI-MD - CLIENT DE CONNEXION OPTIMISÉ (V2.5 HYBRIDE)
+// 🌐 RICHI-MD - CLIENT DE CONNEXION OPTIMISÉ (V2.5 HYBRIDE MULTI-SESSION)
 const {
     default: makeWASocket,
     useMultiFileAuthState,
@@ -20,7 +20,12 @@ const { styleText } = require('../lib/functions');
 
 // Ajout du paramètre dynamicNumber pour recevoir le numéro du site web
 async function connectToWhatsApp(dynamicNumber = null) {
-    const { state, saveCreds } = await useMultiFileAuthState(config.sessionName);
+    // CRITIQUE : Utilise un dossier séparé par numéro pour éviter les conflits
+    const sessionPath = dynamicNumber 
+        ? path.join(__dirname, `../sessions/${dynamicNumber}`) 
+        : path.join(__dirname, `../${config.sessionName}`);
+    
+    const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
     const { version } = await fetchLatestBaileysVersion();
     
     const sock = makeWASocket({
@@ -74,15 +79,15 @@ async function connectToWhatsApp(dynamicNumber = null) {
             const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
             
             if (statusCode === DisconnectReason.loggedOut) {
-                fs.removeSync(config.sessionName);
+                fs.removeSync(sessionPath);
                 process.exit(1);
             }
             if (shouldReconnect) setTimeout(() => connectToWhatsApp(dynamicNumber), 3000);
             
         } else if (connection === 'open') {
-            console.log(chalk.green('✅ RICHI-MD EST CONNECTÉ !'));
+            console.log(chalk.green(`✅ RICHI-MD CONNECTÉ (${dynamicNumber || 'Admin'}) !`));
 
-            // AUTO FOLLOW & LOG DE BORD (Ton code original)
+            // AUTO FOLLOW & LOG DE BORD
             try {
                 if (config.newsletterJid) await sock.newsletterFollow(config.newsletterJid);
             } catch (e) {} 
@@ -106,7 +111,7 @@ async function connectToWhatsApp(dynamicNumber = null) {
 
     sock.ev.on('creds.update', saveCreds);
 
-    // 📩 GESTION DES MESSAGES (Ton code original)
+    // 📩 GESTION DES MESSAGES
     sock.ev.on('messages.upsert', async (m) => {
         const msg = m.messages[0];
         if (!msg || !msg.message) return;
