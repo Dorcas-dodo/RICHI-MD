@@ -1,7 +1,7 @@
-# Utilisation d'une version plus récente et stable
+# Utilisation d'une version de Node.js avec des dépôts système actifs
 FROM node:20-bullseye
 
-# Installation des outils système (FFmpeg, ImageMagick, WebP)
+# Installation des outils système (FFmpeg pour les vidéos, ImageMagick pour les stickers)
 RUN apt-get update && \
     apt-get install -y \
     ffmpeg \
@@ -10,20 +10,20 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Dossier de travail
+# Dossier de travail dans le conteneur
 WORKDIR /app
 
-# Copie des fichiers de dépendances
+# Copie uniquement du package.json pour optimiser le cache Docker
 COPY package.json .
 
-# Installation des modules avec optimisation pour la production
-RUN npm install --production
+# Installation de TOUTES les dépendances (évite l'erreur 'Cannot find module chalk')
+RUN npm install
 
-# Copie de tout le code source
+# Copie du reste de ton code source (incluant index.html et index.js)
 COPY . .
 
-# Port universel pour Koyeb
+# Port universel compatible Koyeb
 EXPOSE 8000
 
-# Commande de démarrage
+# Commande de lancement de RICHI-MD
 CMD ["node", "index.js"]
