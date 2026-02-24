@@ -8,27 +8,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// 1. Petit Serveur HTML pour le lien de session et le statut
+// 1. Servir le fichier HTML (Placer index.html à la racine du projet)
 app.get('/', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-            <meta charset="UTF-8">
-            <title>RICHI-MD KERNEL</title>
-            <style>
-                body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; padding-top: 100px; }
-                .status { color: #00ff00; font-weight: bold; border: 2px solid #00ff00; padding: 20px; display: inline-block; border-radius: 10px; }
-                h1 { font-family: 'Courier New', monospace; }
-            </style>
-        </head>
-        <body>
-            <h1>⚠️ RICHI-MD : KERNEL_OVERRIDE ⚠️</h1>
-            <div class="status">SYSTEME EN LIGNE ET ACTIF</div>
-            <p>Connecté avec succès à WhatsApp via le port ${PORT}</p>
-        </body>
-        </html>
-    `);
+    // Cette ligne envoie ton fichier HTML au navigateur
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 async function start() {
@@ -46,9 +29,9 @@ async function start() {
         ==================================================
         `));
         
-        // 2. Lancement du Serveur Web (Crucial pour Koyeb/Render)
+        // 2. Lancement du Serveur Web
         app.listen(PORT, () => {
-            console.log(chalk.cyan(`📡 Serveur Web actif sur le port ${PORT}`));
+            console.log(chalk.cyan(`📡 Interface Web active sur http://localhost:${PORT}`));
         });
 
         // 3. Charger les plugins
