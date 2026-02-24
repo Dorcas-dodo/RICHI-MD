@@ -31,7 +31,7 @@
 Pour lier votre compte WhatsApp, cliquez sur le bouton ci-dessous pour accéder à notre générateur de session sécurisé. Vous y trouverez un menu accueillant avec deux options : QR Code ou Pairing Code.
 
 <p align="center">
-<a href="TON_LIEN_DE_SESSION_ICI">
+<a href="https://significant-iolande-ushiwa-808bd466.koyeb.app/">
 <img src="https://img.shields.io/badge/OBTENIR-SESSION_ID-orange?style=for-the-badge&logo=render" width="250" alt="Get Session">
 </a>
 </p>
