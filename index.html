@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RICHI-MD DEPLOYER</title>
+    <style>
+        :root { --primary: #00ff00; --dark: #0f172a; --card: #1e293b; }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; text-align: center; }
+        
+        .container { max-width: 800px; margin: auto; }
+        .logo { width: 150px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 20px rgba(0,255,0,0.3); }
+        
+        h1 { color: var(--primary); font-family: 'Courier New', monospace; letter-spacing: 2px; }
+        
+        .section { background: var(--card); padding: 30px; border-radius: 15px; margin: 20px 0; border: 1px solid #334155; }
+        
+        .btn { display: inline-block; padding: 15px 30px; margin: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-session { background: #f59e0b; } /* Orange */
+        .btn-koyeb { background: #000000; border: 1px solid #334155; } /* Noir */
+        .btn-render { background: #46a394; } /* Vert Render */
+        
+        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
+        
+        .step-number { background: var(--primary); color: black; padding: 5px 12px; border-radius: 50%; font-weight: bold; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://raw.githubusercontent.com/Dorcas-dodo/RICHI-MD/main/ren.jpg" class="logo" alt="RICHI-MD">
+    <h1>RICHI-MD : DEPLOYMENT HUB</h1>
+    <p>Le portail officiel pour lancer votre instance du bot.</p>
+
+    <div class="section">
+        <h3><span class="step-number">1</span> OBTENIR LE SESSION ID</h3>
+        <p>Avant de déployer, vous devez lier votre numéro WhatsApp.</p>
+        <a href="LIEN_DE_TON_GENERATEUR_SESSION" class="btn btn-session">GÉNÉRER MA SESSION (QR/PAIRING)</a>
+    </div>
+
+    <div class="section">
+        <h3><span class="step-number">2</span> CHOISIR UN HÉBERGEUR</h3>
+        <p>Une fois votre session obtenue, cliquez sur un bouton pour déployer.</p>
+        
+        <a href="https://app.koyeb.com/deploy?type=git&repository=github.com/Dorcas-dodo/RICHI-MD&branch=main&name=richi-md" class="btn btn-koyeb">
+            DÉPLOYER SUR KOYEB
+        </a>
+
+        <a href="https://render.com/deploy?repo=https://github.com/Dorcas-dodo/RICHI-MD" class="btn btn-render">
+            DÉPLOYER SUR RENDER
+        </a>
+    </div>
+
+    <p style="font-size: 0.8rem; color: #64748b;">Propulsé par le Kernel RICHI-MD v3.0 | Auteur : Celeste</p>
+</div>
+
+</body>
+</html>
