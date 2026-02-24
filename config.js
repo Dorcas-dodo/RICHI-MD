@@ -4,8 +4,9 @@ module.exports = {
   // --- IDENTITÉ ---
   botName: process.env.BOT_NAME || 'Richi-MD',
   ownerName: process.env.OWNER_NAME || 'Celeste',
-  ownerNumber: (process.env.OWNER_NUMBER || '242061167557').split(','), 
-  phoneNumber: process.env.OWNER_NUMBER || '242061167557', 
+  // On laisse vide ou en format exemple pour le mode public
+  ownerNumber: (process.env.OWNER_NUMBER || '242xxxxxxxxx').split(','), 
+  phoneNumber: process.env.OWNER_NUMBER || '', 
   prefix: process.env.PREFIX || '.',
 
   // --- PARAMÈTRES INTERNES ---
