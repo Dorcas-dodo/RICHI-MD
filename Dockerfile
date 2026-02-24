@@ -1,29 +1,29 @@
-# Image de base stable
-FROM node:lts-buster
+# Utilisation d'une version plus récente et stable
+FROM node:20-bullseye
 
-# Installation des outils système nécessaires au bot (Stickers, Vidéos, Audios)
+# Installation des outils système (FFmpeg, ImageMagick, WebP)
 RUN apt-get update && \
-  apt-get install -y \
-  ffmpeg \
-  imagemagick \
-  webp && \
-  apt-get upgrade -y && \
-  rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+    ffmpeg \
+    imagemagick \
+    webp && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Dossier de travail
 WORKDIR /app
 
-# Gestion des dépendances
+# Copie des fichiers de dépendances
 COPY package.json .
-RUN npm install
 
-# Copie du code source
+# Installation des modules avec optimisation pour la production
+RUN npm install --production
+
+# Copie de tout le code source
 COPY . .
 
-# Note: Render et Koyeb ignorent souvent EXPOSE pour utiliser leur propre routage, 
-# mais on laisse 8000 par convention pour Koyeb.
+# Port universel pour Koyeb
 EXPOSE 8000
 
-# Lancement du bot
-# Le script index.js doit utiliser process.env.PORT pour être compatible
+# Commande de démarrage
 CMD ["node", "index.js"]
